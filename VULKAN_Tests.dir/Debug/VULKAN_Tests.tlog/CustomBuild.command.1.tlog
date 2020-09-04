@@ -1,0 +1,10 @@
+^D:\GIT\TRYINGVULKAN\CMAKELISTS.TXT
+setlocal
+C:\Octave\Octave-5.2.0\mingw64\bin\cmake.exe -SD:/GIT/TryingVulkan -BD:/GIT/TryingVulkan --check-stamp-file D:/GIT/TryingVulkan/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

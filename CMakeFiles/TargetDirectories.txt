@@ -1,0 +1,9 @@
+D:/GIT/TryingVulkan/CMakeFiles/INSTALL.dir
+D:/GIT/TryingVulkan/CMakeFiles/VULKAN_Tests.dir
+D:/GIT/TryingVulkan/CMakeFiles/ALL_BUILD.dir
+D:/GIT/TryingVulkan/CMakeFiles/ZERO_CHECK.dir
+D:/GIT/TryingVulkan/Dependencies/vendor/glfw/CMakeFiles/INSTALL.dir
+D:/GIT/TryingVulkan/Dependencies/vendor/glfw/CMakeFiles/uninstall.dir
+D:/GIT/TryingVulkan/Dependencies/vendor/glfw/CMakeFiles/ALL_BUILD.dir
+D:/GIT/TryingVulkan/Dependencies/vendor/glfw/src/CMakeFiles/INSTALL.dir
+D:/GIT/TryingVulkan/Dependencies/vendor/glfw/src/CMakeFiles/glfw.dir
