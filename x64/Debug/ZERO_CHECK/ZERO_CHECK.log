@@ -1,0 +1,10 @@
+﻿  Checking Build System
+  CMake is re-running because D:/GIT/TryingVulkan/CMakeFiles/generate.stamp is out-of-date.
+    the file 'D:/GIT/TryingVulkan/CMakeLists.txt'
+    is newer than 'D:/GIT/TryingVulkan/CMakeFiles/generate.stamp.depend'
+    result='-1'
+  -- Selecting Windows SDK version 10.0.18362.0 to target Windows 10.0.18363.
+  -- Using Win32 for window creation
+  -- Configuring done
+  -- Generating done
+  -- Build files have been written to: D:/GIT/TryingVulkan
