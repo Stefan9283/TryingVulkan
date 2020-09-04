@@ -1,3 +1,3 @@
 #! /usr/bin/bash
 
-rm -r CMakeFiles CMakeCache.txt
+rm -r CMakeFiles CMakeCache.txt *.vcxproj* *.sln cmake_install* x64 VULKAN*
