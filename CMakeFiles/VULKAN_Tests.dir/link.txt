@@ -1,0 +1,1 @@
+/usr/bin/c++   -Wall -Wextra -Wpedantic -std=c++17 -O2  -lglfw -lvulkan -ldl -lpthread   CMakeFiles/VULKAN_Tests.dir/Dependencies/src/main.cpp.o  -o VULKAN_Tests/VULKAN_Tests  Dependencies/vendor/glfw/src/libglfw3.a /usr/lib/x86_64-linux-gnu/libvulkan.so -lpthread /usr/lib/x86_64-linux-gnu/librt.so -lm -ldl 

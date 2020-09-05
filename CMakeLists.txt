@@ -25,7 +25,7 @@ if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE )  # poti sa folosesti si functii nesigure (ex fopen)
 
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++17 -O2  -lglfw -lvulkan -ldl -lpthread")
     if(NOT WIN32)
         #set(GLAD_LIBRARIES g dl GL GLU glfw X11 Xxf86vm Xrandr pthread Xi Xinerama Xcursor assimp)
     endif()
