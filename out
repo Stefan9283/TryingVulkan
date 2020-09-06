@@ -1,0 +1,38 @@
+validation layer: loaderGetDeviceRegistryFiles: GUID for 2 is not SoftwareComponent skipping
+validation layer: Searching for ICD drivers named .\nvoglv64.dll
+validation layer: Build ICD instance extension list
+validation layer: Instance Extension: VK_KHR_device_group_creation (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_fence_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_memory_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_semaphore_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_get_physical_device_properties2 (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.2
+validation layer: Instance Extension: VK_KHR_get_surface_capabilities2 (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_surface (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.25
+validation layer: Instance Extension: VK_KHR_surface_protected_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_win32_surface (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.6
+validation layer: Instance Extension: VK_EXT_debug_report (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.9
+validation layer: Instance Extension: VK_EXT_debug_utils (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_EXT_swapchain_colorspace (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.4
+validation layer: Instance Extension: VK_NV_external_memory_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Loading layer library C:\VulkanSDK\1.2.148.1\Bin\.\VkLayer_khronos_validation.dll
+validation layer: Loading layer library C:\Program Files (x86)\RivaTuner Statistics Server\Vulkan\.\RTSSVkLayer64.dll
+validation layer: Loading layer library C:\ProgramData\obs-studio-hook\.\graphics-hook64.dll
+validation layer: Loading layer library C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll
+validation layer: Build ICD instance extension list
+validation layer: Instance Extension: VK_KHR_device_group_creation (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_fence_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_memory_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_external_semaphore_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_get_physical_device_properties2 (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.2
+validation layer: Instance Extension: VK_KHR_get_surface_capabilities2 (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_surface (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.25
+validation layer: Instance Extension: VK_KHR_surface_protected_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_KHR_win32_surface (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.6
+validation layer: Instance Extension: VK_EXT_debug_report (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.9
+validation layer: Instance Extension: VK_EXT_debug_utils (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Instance Extension: VK_EXT_swapchain_colorspace (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.4
+validation layer: Instance Extension: VK_NV_external_memory_capabilities (C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll) version 0.0.1
+validation layer: Unloading layer library C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_ba8c9c14f3d320cb\.\nvoglv64.dll
+validation layer: Unloading layer library C:\ProgramData\obs-studio-hook\.\graphics-hook64.dll
+validation layer: Unloading layer library C:\Program Files (x86)\RivaTuner Statistics Server\Vulkan\.\RTSSVkLayer64.dll
+validation layer: Unloading layer library C:\VulkanSDK\1.2.148.1\Bin\.\VkLayer_khronos_validation.dll
