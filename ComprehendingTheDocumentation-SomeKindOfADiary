@@ -1,0 +1,11 @@
+
+Every Vulkan process needs:
+- at least one instance
+- at least a physical device (any Vulkan capable GPUs on the host)
+- at least a logical device (through which we can communicate with the physical one)
+- a family of queues on which we can store function calls that will be run asynchronously
+- a swap chain (some kind of a framebuffer)
+
+For degugging purposes validation layers can be used.
+Their behaviour can be  changed using the Vulkan Configurator that
+comes with the LunarG Vulkan SDK.
