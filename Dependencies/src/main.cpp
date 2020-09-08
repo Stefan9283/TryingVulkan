@@ -15,6 +15,275 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+namespace utils
+{
+    template <class T, class S>
+    std::vector<T> getData(S param, VkResult(*f)(S, uint32_t*, T*))
+    {
+        uint32_t count = 0;
+
+        if (f(param, &count, NULL) != VK_SUCCESS)
+            throw std::runtime_error("Could't get entities count\n");
+
+        std::vector<VkPhysicalDevice> data(count);
+
+        if (f(param, &count, data.data()) != VK_SUCCESS)
+            throw std::runtime_error("Could't get data\n");
+
+        return data;
+    }
+
+    template <class T, class S>
+    std::vector<T> getData(S param, VkResult(*f)(S, const char*, uint32_t*, T*))
+    {
+        uint32_t count = 0;
+
+        if (f(param, NULL, &count, NULL) != VK_SUCCESS)
+            throw std::runtime_error("Could't get entities count\n");
+
+        std::vector<T> data(count);
+
+        if (f(param, NULL, &count, data.data()) != VK_SUCCESS)
+            throw std::runtime_error("Could't get data\n");
+
+        return data;
+    }
+
+
+
+
+}
+namespace wrappers
+{
+    std::vector<VkPhysicalDevice> getGPUS(VkInstance instance)
+    {
+        std::vector<VkPhysicalDevice> gpus = utils::getData(instance, vkEnumeratePhysicalDevices);
+        return gpus;
+    }
+
+    std::vector<VkExtensionProperties> getExtensions(VkPhysicalDevice device)
+    {
+        std::vector<VkExtensionProperties> ext = utils::getData(device, vkEnumerateDeviceExtensionProperties);
+        return ext;
+    }
+
+}
+namespace gpu
+{
+    void ListExtensions(VkPhysicalDevice device)
+    {
+        VkPhysicalDeviceProperties properties;
+        vkGetPhysicalDeviceProperties(device, &properties);
+        std::cout << "\t" << properties.deviceName << "\n";
+
+
+        std::vector<VkExtensionProperties> extensions = wrappers::getExtensions(device);
+        
+
+        std::cout << "\tSupported extensions:\n";
+        for (auto extension : extensions)
+        {
+            std::cout << "\t\t" << extension.extensionName << "\n";
+        }
+    }
+ 
+    void SelectGPU()
+    {
+        static int index = 0;
+    }
+
+    void doGPUOperation(VkInstance instance, void (*func)(VkPhysicalDevice device) = NULL)
+    {
+        
+        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
+
+        if (func)
+        {
+            for (auto gpu : gpus)
+            {
+                func(gpu);
+            }
+        }
+        
+            
+    }
+}
+
+
+// TEST ZONE
+
+class ValidationLayers
+{
+    ValidationLayers() {};
+    ~ValidationLayers() {};
+
+    const std::vector<const char*> requiredValidationLayers = { "VK_LAYER_LUNARG_standard_validation" };
+
+    bool checkSupport()
+    {
+        uint32_t layerCount = 0;
+
+        vkEnumerateInstanceLayerProperties(&layerCount, NULL);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+
+
+
+    }
+
+};
+
+
+class VulkanProgram
+{
+public:
+    VkInstance instance;
+
+    void run()
+    {
+
+        initWindow();
+        initVulkan();
+
+        gpu::doGPUOperation(instance, gpu::ListExtensions);
+
+        // TEST ZONE
+        //std::vector<VkPhysicalDevice> gpus = utils::getGPUS(instance);
+        /* VULKAN_KEY_START */
+        /*
+        VkDeviceQueueCreateInfo queue_info = {};
+
+        uint32_t queue_family_count = 0;
+
+        vkGetPhysicalDeviceQueueFamilyProperties(gpus[0], &queue_family_count, NULL);
+
+        std::vector<VkQueueFamilyProperties> Qprop(queue_family_count);
+
+        vkGetPhysicalDeviceQueueFamilyProperties(gpus[0], &queue_family_count, Qprop.data());
+
+        bool found = false;
+        for (unsigned int i = 0; i < queue_family_count; i++) {
+            if (Qprop[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                queue_info.queueFamilyIndex = i;
+                found = true;
+                break;
+            }
+        }
+
+        float queue_priorities[1] = { 0.0 };
+        queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_info.pNext = NULL;
+        queue_info.queueCount = 1;
+        queue_info.pQueuePriorities = queue_priorities;
+
+        VkDeviceCreateInfo device_info = {};
+        device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        device_info.pNext = NULL;
+        device_info.queueCreateInfoCount = 1;
+        device_info.pQueueCreateInfos = &queue_info;
+        device_info.enabledExtensionCount = 0;
+        device_info.ppEnabledExtensionNames = NULL;
+        device_info.enabledLayerCount = 0;
+        device_info.ppEnabledLayerNames = NULL;
+        device_info.pEnabledFeatures = NULL;
+
+        VkDevice device;
+        if (vkCreateDevice(gpus[0], &device_info, NULL, &device) != VK_SUCCESS)
+            throw std::runtime_error("Could't create device!");
+
+        vkDestroyDevice(device, NULL);
+        
+        /* VULKAN_KEY_END */
+
+
+       // ClearUp();
+    }
+
+private:
+    GLFWwindow* window;
+    void initWindow()
+    {
+        glfwInit();
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
+    }
+
+#pragma region initVulkan
+    void initVulkan()
+    {
+        std::cout << "Initializing the engine...\n";
+        genInstance();
+    }
+
+    void genInstance()
+    {
+        /* VULKAN_KEY_START */
+
+        // initialize the VkApplicationInfo structure
+        VkApplicationInfo app_info = {};
+        app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        app_info.pNext = NULL;
+        app_info.pApplicationName = "cow.exe";
+        app_info.applicationVersion = 0.000000069;
+        app_info.pEngineName = "Umbra";
+        app_info.engineVersion = 0.0000000420;
+        app_info.apiVersion = VK_API_VERSION_1_0;
+
+        // initialize the VkInstanceCreateInfo structure
+        VkInstanceCreateInfo inst_info = {};
+        inst_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        inst_info.pNext = NULL;
+        inst_info.flags = 0;
+        inst_info.pApplicationInfo = &app_info;
+        inst_info.enabledExtensionCount = 0;
+        inst_info.ppEnabledExtensionNames = NULL;
+        inst_info.enabledLayerCount = 0;
+        inst_info.ppEnabledLayerNames = NULL;
+
+        VkResult res = vkCreateInstance(&inst_info, NULL, &instance);
+        if (res == VK_ERROR_INCOMPATIBLE_DRIVER) {
+            std::cout << "cannot find a compatible Vulkan ICD\n";
+            exit(-1);
+        }
+        else if (res) {
+            std::cout << "unknown error\n";
+            exit(-1);
+        }
+        else std::cout << "Instance was created successfully\n";
+
+    }
+#pragma endregion 
+
+
+    void Loop()
+    {
+
+    }
+
+    void ClearUp()
+    {
+        vkDestroyInstance(instance, NULL);
+        std::cout << "Cleaning done";
+    }
+
+};
+
+
+int main(int argc, char* argv[])
+{
+    VulkanProgram prog;
+    prog.run();
+}
+
+
+
+/*
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
+
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
 const std::vector<const char*> validationLayers = {
@@ -906,4 +1175,4 @@ int main() {
     }
 
     return EXIT_SUCCESS;
-}
+}*/
