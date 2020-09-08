@@ -384,6 +384,15 @@ private:
     }
 
     void initVulkan() {
+        
+        uint32_t extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        std::vector<VkExtensionProperties> extensions(extensionCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+        std::cout << "available extensions:\n";
+        for (const auto& extension : extensions)
+            std::cout << '\t' << extension.extensionName << " v" << extension.specVersion << '\n';
+
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -1113,12 +1122,17 @@ private:
         return extensions;
     }
 
+
     bool checkValidationLayerSupport() {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+
+
+
 
         for (const char* layerName : validationLayers) {
             bool layerFound = false;
