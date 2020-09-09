@@ -66,6 +66,20 @@ namespace utils
     }
 
     template <class T, class S>
+    std::vector<T> getData(S param, void (*f)(S, uint32_t*, T*))
+    {
+        uint32_t count = 0;
+
+        f(param, &count, NULL);
+
+        std::vector<T> data(count);
+
+        f(param, &count, data.data());
+
+        return data;
+    }
+
+    template <class T, class S>
     std::vector<T> getData(S param, VkResult(*f)(S, const char*, uint32_t*, T*))
     {
         uint32_t count = 0;
@@ -209,8 +223,12 @@ namespace utils
     }
 
 }
+
 namespace wrappers
 {
+
+
+
     std::vector<VkPhysicalDevice> getGPUS(VkInstance instance)
     {
         std::vector<VkPhysicalDevice> gpus = utils::getData(instance, vkEnumeratePhysicalDevices);
@@ -263,7 +281,6 @@ namespace gpu
 
         return score;
     }
-
 
     bool compareRatedGPUs(std::pair<VkPhysicalDevice, int> GPUa, std::pair<VkPhysicalDevice, int>GPUb)
     {
@@ -348,6 +365,14 @@ namespace gpu
             
     }
 }
+namespace queuefamilies
+{
+    std::vector<VkQueueFamilyProperties> getQueueProperties(VkPhysicalDevice device)
+    {
+        std::vector<VkQueueFamilyProperties> Properties = utils::getData(device, vkGetPhysicalDeviceQueueFamilyProperties);
+        return Properties;
+    }
+};
 
 class Extensions
 {
@@ -424,29 +449,26 @@ public:
     void run()
     {
 
-        initWindow();
+        //initWindow();
         initVulkan();
         setupDebugMessenger();
 
         //gpu::doGPUOperation(instance, gpu::ListExtensions);
 
+        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
+
 
         // TEST ZONE
         //std::vector<VkPhysicalDevice> gpus = utils::getGPUS(instance);
         /* VULKAN_KEY_START */
-        /*
         VkDeviceQueueCreateInfo queue_info = {};
 
-        uint32_t queue_family_count = 0;
 
-        vkGetPhysicalDeviceQueueFamilyProperties(gpus[0], &queue_family_count, NULL);
 
-        std::vector<VkQueueFamilyProperties> Qprop(queue_family_count);
-
-        vkGetPhysicalDeviceQueueFamilyProperties(gpus[0], &queue_family_count, Qprop.data());
-
+        std::vector<VkQueueFamilyProperties> Qprop = queuefamilies::getQueueProperties(physicalDevice);
+        
         bool found = false;
-        for (unsigned int i = 0; i < queue_family_count; i++) {
+        for (unsigned int i = 0; i < Qprop.size(); i++) {
             if (Qprop[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 queue_info.queueFamilyIndex = i;
                 found = true;
@@ -476,7 +498,6 @@ public:
             throw std::runtime_error("Could't create device!");
 
         vkDestroyDevice(device, NULL);
-        */
         /* VULKAN_KEY_END */
 
         std::cout << "Sup\n";
