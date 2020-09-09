@@ -229,7 +229,6 @@ namespace wrappers
         return layers;
     }
 
-
 }
 namespace gpu
 {
@@ -250,9 +249,87 @@ namespace gpu
         }
     }
  
-    void SelectGPU()
+    int rateGPU(VkPhysicalDevice device)
     {
-        static int index = 0;
+        int score = 0;
+
+        VkPhysicalDeviceProperties Properties;
+        vkGetPhysicalDeviceProperties(device, &Properties);
+
+        if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+            score += 1000;
+        }
+        score += Properties.limits.maxImageDimension2D;
+
+        return score;
+    }
+
+
+    bool compareRatedGPUs(std::pair<VkPhysicalDevice, int> GPUa, std::pair<VkPhysicalDevice, int>GPUb)
+    {
+        return GPUa.second > GPUb.second;
+    }
+
+    bool isGPUSuitable(VkPhysicalDevice device, std::vector<const char*> required_extensions)
+    {
+        VkPhysicalDeviceProperties properties;
+        vkGetPhysicalDeviceProperties(device, &properties);
+
+
+        std::vector<VkExtensionProperties> extensions = wrappers::getExtensions(device);
+
+
+        for (auto req_extension : required_extensions)
+        {
+            bool found = false;
+            for (auto extension : extensions)
+            {
+                std::cout << "\t\t" << extension.extensionName << "\n";
+                if (!strcmp(req_extension, extension.extensionName))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                return false;
+        }
+        return true;
+    }
+
+    VkPhysicalDevice SelectGPU(VkInstance instance, std::vector<const char*> required_ext)
+    {
+        VkPhysicalDevice device = VK_NULL_HANDLE;
+
+        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
+
+        std::vector < std::pair<VkPhysicalDevice, int>> ratedGPUs;
+        for (auto gpu : gpus)
+        {
+            std::pair<VkPhysicalDevice, int> Pair;
+            int score = rateGPU(gpu);
+            Pair = std::make_pair(gpu, score);
+            ratedGPUs.push_back(Pair);
+        }
+
+        std::sort(ratedGPUs.begin(), ratedGPUs.end(), compareRatedGPUs);
+
+        for (auto pair : ratedGPUs)
+        {
+            VkPhysicalDeviceProperties Properties;
+            vkGetPhysicalDeviceProperties(pair.first, &Properties);
+
+            std::cout << Properties.deviceName << " score:" << pair.second << "\n";
+            if (isGPUSuitable(pair.first, required_ext))
+            {
+                device = pair.first;
+                break;
+            }
+        }
+            
+        return device;
+        
     }
 
     void doGPUOperation(VkInstance instance, void (*func)(VkPhysicalDevice device) = NULL)
@@ -338,6 +415,7 @@ public:
 class VulkanProgram
 {
 public:
+
     VkInstance instance;
     Extensions Ext;
     ValidationLayers valLay;
@@ -475,10 +553,14 @@ private:
     }
 
 #pragma region initVulkan
+
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
     void initVulkan()
     {
         std::cout << "Initializing the engine...\n";
         genInstance();
+        physicalDevice = gpu::SelectGPU(instance, Ext.requiredExtensions);
     }
 
     void genInstance()

@@ -9,8 +9,8 @@ https://vulkan-tutorial.com/
 TODO:
 - ~~Fix CMake linking issues~~
 - ~~layer validation fixing~~
-- create a GPU rating function
-- select physical device
+- ~~create a GPU rating function~~
+- ~~select physical device~~
 - pick a queue family
 - create logical device
 - create swapchain
