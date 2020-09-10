@@ -33,10 +33,6 @@ const bool enableValidationLayers = true;
 #define checkcall(x)\
     VkResult r = x;\
     ASSERT(utils::CheckError(r, #x, __FILE__, __LINE__))
-#else
-
-#define checkcall(x)\
-    x;
 #endif
 
 namespace utils
