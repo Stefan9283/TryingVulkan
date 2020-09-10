@@ -97,6 +97,25 @@ namespace utils
         return data;
     }
 
+    template <class T, class S, class U>
+    std::vector<T> getData(S param1, U param2, VkResult(*f)(S, U, uint32_t*, T*))
+    {
+        uint32_t count = 0;
+
+        if (f(param1, param2, &count, NULL) != VK_SUCCESS)
+            throw std::runtime_error("Could't get entities count\n");
+
+        std::vector<T> data(count);
+
+        if (f(param1, param2, &count, data.data()) != VK_SUCCESS)
+            throw std::runtime_error("Could't get data\n");
+
+        return data;
+    }
+
+
+
+
     int getErrors(VkResult r)
     {
         switch (r)
@@ -225,160 +244,179 @@ namespace utils
     }
 
 }
-
 namespace wrappers
 {
-
-    std::vector<VkPhysicalDevice> getGPUS(VkInstance instance)
-    {
-        std::vector<VkPhysicalDevice> gpus = utils::getData(instance, vkEnumeratePhysicalDevices);
-        return gpus;
-    }
-
-    std::vector<VkExtensionProperties> getExtensions(VkPhysicalDevice device)
-    {
-        std::vector<VkExtensionProperties> ext = utils::getData(device, vkEnumerateDeviceExtensionProperties);
-        return ext;
-    }
-
     std::vector<VkLayerProperties> getLayers()
     {
         std::vector<VkLayerProperties> layers = utils::getData(vkEnumerateInstanceLayerProperties);
         return layers;
     }
-
-}
-namespace gpu
-{
-    void ListExtensions(VkPhysicalDevice device)
+    namespace queuefamilies
     {
-        VkPhysicalDeviceProperties properties;
-        vkGetPhysicalDeviceProperties(device, &properties);
-        std::cout << "\t" << properties.deviceName << "\n";
-
-
-        std::vector<VkExtensionProperties> extensions = wrappers::getExtensions(device);
-        
-
-        std::cout << "\tSupported extensions:\n";
-        for (auto extension : extensions)
+        std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice device)
         {
-            std::cout << "\t\t" << extension.extensionName << "\n";
+            std::vector<VkQueueFamilyProperties> Properties = utils::getData(device, vkGetPhysicalDeviceQueueFamilyProperties);
+            return Properties;
         }
-    }
- 
-    int rateGPU(VkPhysicalDevice device)
+    };
+    namespace gpu
     {
-        int score = 0;
 
-        VkPhysicalDeviceProperties Properties;
-        vkGetPhysicalDeviceProperties(device, &Properties);
-
-        if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-            score += 1000;
-        }
-        score += Properties.limits.maxImageDimension2D;
-
-        return score;
-    }
-
-    bool compareRatedGPUs(std::pair<VkPhysicalDevice, int> GPUa, std::pair<VkPhysicalDevice, int>GPUb)
-    {
-        return GPUa.second > GPUb.second;
-    }
-
-
-    bool checkGPUExtensionsSupport(VkPhysicalDevice device, std::vector<const char*> required_ext)
-    {
-        VkPhysicalDeviceProperties properties;
-        vkGetPhysicalDeviceProperties(device, &properties);
-
-        std::vector<VkExtensionProperties> extensions = wrappers::getExtensions(device);
-
-        for (auto req : required_ext)
+        std::vector<VkPhysicalDevice> getGPUS(VkInstance instance)
         {
-            bool found = false;
+            std::vector<VkPhysicalDevice> gpus = utils::getData(instance, vkEnumeratePhysicalDevices);
+            return gpus;
+        }
 
+        std::vector<VkExtensionProperties> getExtensions(VkPhysicalDevice device)
+        {
+            std::vector<VkExtensionProperties> ext = utils::getData(device, vkEnumerateDeviceExtensionProperties);
+            return ext;
+        }
+
+
+        void ListExtensions(VkPhysicalDevice device)
+        {
+            VkPhysicalDeviceProperties properties;
+            vkGetPhysicalDeviceProperties(device, &properties);
+            std::cout << "\t" << properties.deviceName << "\n";
+
+
+            std::vector<VkExtensionProperties> extensions = wrappers::gpu::getExtensions(device);
+
+
+            std::cout << "\tSupported extensions:\n";
             for (auto extension : extensions)
             {
-                if (!strcmp(extension.extensionName, req))
+                std::cout << "\t\t" << extension.extensionName << "\n";
+            }
+        }
+
+        int rateGPU(VkPhysicalDevice device)
+        {
+            int score = 0;
+
+            VkPhysicalDeviceProperties Properties;
+            vkGetPhysicalDeviceProperties(device, &Properties);
+
+            if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+                score += 1000;
+            }
+            score += Properties.limits.maxImageDimension2D;
+
+            return score;
+        }
+
+        bool compareRatedGPUs(std::pair<VkPhysicalDevice, int> GPUa, std::pair<VkPhysicalDevice, int>GPUb)
+        {
+            return GPUa.second > GPUb.second;
+        }
+
+
+        bool checkGPUExtensionsSupport(VkPhysicalDevice device, std::vector<const char*> required_ext)
+        {
+            VkPhysicalDeviceProperties properties;
+            vkGetPhysicalDeviceProperties(device, &properties);
+
+            std::vector<VkExtensionProperties> extensions = wrappers::gpu::getExtensions(device);
+
+            for (auto req : required_ext)
+            {
+                bool found = false;
+
+                for (auto extension : extensions)
                 {
-                    found = true;
+                    if (!strcmp(extension.extensionName, req))
+                    {
+                        found = true;
+                        break;
+                    }
+                    //std::cout << "\t\t" << extension.extensionName << "\n";
+                }
+
+                if (!found)
+                    return false;//throw std::runtime_error("Extension is not supported\n");
+            }
+
+            return true;
+
+        }
+
+
+        bool isGPUSuitable(VkPhysicalDevice device, std::vector<const char*> required_ext)
+        {
+            VkPhysicalDeviceFeatures features;
+            VkPhysicalDeviceProperties properties;
+
+            vkGetPhysicalDeviceProperties(device, &properties);
+            vkGetPhysicalDeviceFeatures(device, &features);
+
+            //ListExtensions(device);
+
+            bool ext_support = checkGPUExtensionsSupport(device, required_ext);
+
+            return properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && features.geometryShader && ext_support;
+
+        }
+
+        VkPhysicalDevice SelectGPU(VkInstance instance, std::vector<const char*> required_ext)
+        {
+            VkPhysicalDevice device = VK_NULL_HANDLE;
+
+            std::vector<VkPhysicalDevice> gpus = wrappers::gpu::getGPUS(instance);
+
+            std::vector < std::pair<VkPhysicalDevice, int>> ratedGPUs;
+            for (auto gpu : gpus)
+            {
+                std::pair<VkPhysicalDevice, int> Pair;
+                int score = rateGPU(gpu);
+                Pair = std::make_pair(gpu, score);
+                ratedGPUs.push_back(Pair);
+            }
+
+            std::sort(ratedGPUs.begin(), ratedGPUs.end(), compareRatedGPUs);
+
+            for (auto pair : ratedGPUs)
+            {
+                VkPhysicalDeviceProperties Properties;
+                vkGetPhysicalDeviceProperties(pair.first, &Properties);
+
+                std::cout << Properties.deviceName << " score:" << pair.second << "\n";
+                if (isGPUSuitable(pair.first, required_ext))
+                {
+                    device = pair.first;
                     break;
                 }
-                //std::cout << "\t\t" << extension.extensionName << "\n";
             }
+            if (device == VK_NULL_HANDLE)
+                throw std::runtime_error("No GPU was selected\n");
 
-            if (!found)
-                return false;//throw std::runtime_error("Extension is not supported\n");
+            return device;
+
         }
 
-        return true;
-        
     }
 
-
-    bool isGPUSuitable(VkPhysicalDevice device, std::vector<const char*> required_ext)
+    std::vector<VkSurfaceFormatKHR> getSurfaceFormats(VkPhysicalDevice device, VkSurfaceKHR surface)
     {
-        VkPhysicalDeviceFeatures features;
-        VkPhysicalDeviceProperties properties;
-       
-        vkGetPhysicalDeviceProperties(device, &properties);
-        vkGetPhysicalDeviceFeatures(device, &features);
-
-        //ListExtensions(device);
-
-        bool ext_support = checkGPUExtensionsSupport(device, required_ext);
-
-        return properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && features.geometryShader && ext_support;
-
+        std::vector<VkSurfaceFormatKHR> formats = utils::getData(device, surface, vkGetPhysicalDeviceSurfaceFormatsKHR);
+        return formats;
     }
 
-    VkPhysicalDevice SelectGPU(VkInstance instance, std::vector<const char*> required_ext)
+    std::vector<VkPresentModeKHR> getPresentModes(VkPhysicalDevice device, VkSurfaceKHR surface)
     {
-        VkPhysicalDevice device = VK_NULL_HANDLE;
-
-        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
-
-        std::vector < std::pair<VkPhysicalDevice, int>> ratedGPUs;
-        for (auto gpu : gpus)
-        {
-            std::pair<VkPhysicalDevice, int> Pair;
-            int score = rateGPU(gpu);
-            Pair = std::make_pair(gpu, score);
-            ratedGPUs.push_back(Pair);
-        }
-
-        std::sort(ratedGPUs.begin(), ratedGPUs.end(), compareRatedGPUs);
-
-        for (auto pair : ratedGPUs)
-        {
-            VkPhysicalDeviceProperties Properties;
-            vkGetPhysicalDeviceProperties(pair.first, &Properties);
-
-            std::cout << Properties.deviceName << " score:" << pair.second << "\n";
-            if (isGPUSuitable(pair.first, required_ext))
-            {
-                device = pair.first;
-                break;
-            }
-        }
-        if (device == VK_NULL_HANDLE)
-            throw std::runtime_error("No GPU was selected\n");
-
-        return device;
-        
+        std::vector<VkPresentModeKHR> formats = utils::getData(device, surface, vkGetPhysicalDeviceSurfacePresentModesKHR);
+        return formats;
     }
 
+    VkSurfaceCapabilitiesKHR getSurfaceCapabilities(VkPhysicalDevice device, VkSurfaceKHR surface)
+    {
+        VkSurfaceCapabilitiesKHR surfCapabilities;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &surfCapabilities);
+        return surfCapabilities;
+
+    }
 }
-namespace queuefamilies
-{
-    std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice device)
-    {
-        std::vector<VkQueueFamilyProperties> Properties = utils::getData(device, vkGetPhysicalDeviceQueueFamilyProperties);
-        return Properties;
-    }
-};
 
 class Extensions
 {
@@ -397,7 +435,7 @@ public:
 
         glfwExtensions = glfwGetRequiredInstanceExtensions(&count);
 
-        for (auto i = 0; i < count; i++)
+        for (uint32_t i = 0; i < count; i++)
         {
             requiredExtensions.push_back(glfwExtensions[i]);
         }
@@ -462,6 +500,10 @@ public:
 
         initWindow();
         initVulkan();
+        std::vector<VkSurfaceFormatKHR> formats = wrappers::getSurfaceFormats(physicalDevice, surface);
+        std::vector<VkPresentModeKHR> presModes = wrappers::getPresentModes(physicalDevice, surface);
+        VkSurfaceCapabilitiesKHR capabilities = wrappers::getSurfaceCapabilities(physicalDevice, surface);
+
         setupDebugMessenger();
 
         Loop();
@@ -553,7 +595,7 @@ private:
 
     struct QueueFamilyIndices
     {
-        uint32_t graphics = -1, presentation = -1;
+        int graphics = -1, presentation = -1;
         bool isComplete()
         {
             return (graphics != -1) && (presentation != -1);
@@ -562,10 +604,10 @@ private:
 
     void genDevice()
     {
-        physicalDevice = gpu::SelectGPU(instance, Ext.deviceExtensions);
+        physicalDevice = wrappers::gpu::SelectGPU(instance, Ext.deviceExtensions);
 
 
-        std::vector<VkQueueFamilyProperties> Qprop = queuefamilies::getQueueFamilyProperties(physicalDevice);
+        std::vector<VkQueueFamilyProperties> Qprop = wrappers::queuefamilies::getQueueFamilyProperties(physicalDevice);
 
         QueueFamilyIndices fam;
 
@@ -593,7 +635,7 @@ private:
         if (!fam.isComplete())
             throw std::runtime_error("No QueueFamily was selected\n");
 
-        std::set<uint32_t> uniqueQueueFamilies = { fam.presentation, fam.graphics };
+        std::set<uint32_t> uniqueQueueFamilies = { (uint32_t)fam.presentation, (uint32_t)fam.graphics };
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 

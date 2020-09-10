@@ -1,0 +1,19 @@
+﻿  main.cpp
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(241,80): warning C4100: 'line': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(241,70): warning C4100: 'file': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(241,48): warning C4100: 'function': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(519,203): warning C4458: declaration of 'instance' hides class member
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(491,16): message : see declaration of 'VulkanProgram::instance'
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(528,143): warning C4458: declaration of 'instance' hides class member
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(491,16): message : see declaration of 'VulkanProgram::instance'
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(528,143): warning C4458: declaration of 'debugMessenger' hides class member
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(515,30): message : see declaration of 'VulkanProgram::debugMessenger'
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(560,15): warning C4100: 'pUserData': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(558,41): warning C4100: 'messageType': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(557,48): warning C4100: 'messageSeverity': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(643,19): warning C4189: 'qFamily': local variable is initialized but not referenced
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(680,39): warning C4244: '=': conversion from 'double' to 'uint32_t', possible loss of data
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(682,34): warning C4244: '=': conversion from 'double' to 'uint32_t', possible loss of data
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(741,26): warning C4100: 'argv': unreferenced formal parameter
+D:\GIT\TryingVulkan\Dependencies\src\main.cpp(741,14): warning C4100: 'argc': unreferenced formal parameter
+  VULKAN_Tests.vcxproj -> D:\GIT\TryingVulkan\VULKAN_Tests\Debug\VULKAN_Tests.exe
