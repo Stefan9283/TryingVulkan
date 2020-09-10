@@ -16,3 +16,14 @@ TODO:
 - create swapchain
 - create imageviews 
 - start working on the graphics pipeline implementation...
+
+Dependencies:
+
+- on Windows: LunarG Vulkan SDK
+- on Linux: libvulkan1 mesa-vulkan-drivers vulkan-utils (optional: vulkan-tools)
+
+Future Submodules:
+
+- Assimp
+- stbi
+- bullet3 (maybe?)
