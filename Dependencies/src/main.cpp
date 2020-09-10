@@ -11,6 +11,13 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <string>
+
+#include <bitset>
+
+
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
 
 
 #ifdef NDEBUG
@@ -27,9 +34,6 @@ const bool enableValidationLayers = true;
     VkResult r = x;\
     ASSERT(utils::CheckError(r, #x, __FILE__, __LINE__))
 #endif
-
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
 
 namespace utils
 {
@@ -69,9 +73,7 @@ namespace utils
     std::vector<T> getData(S param, void (*f)(S, uint32_t*, T*))
     {
         uint32_t count = 0;
-
         f(param, &count, NULL);
-
         std::vector<T> data(count);
 
         f(param, &count, data.data());
@@ -227,8 +229,6 @@ namespace utils
 namespace wrappers
 {
 
-
-
     std::vector<VkPhysicalDevice> getGPUS(VkInstance instance)
     {
         std::vector<VkPhysicalDevice> gpus = utils::getData(instance, vkEnumeratePhysicalDevices);
@@ -287,32 +287,51 @@ namespace gpu
         return GPUa.second > GPUb.second;
     }
 
-    bool isGPUSuitable(VkPhysicalDevice device, std::vector<const char*> required_extensions)
+
+    bool checkGPUExtensionsSupport(VkPhysicalDevice device, std::vector<const char*> required_ext)
     {
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(device, &properties);
 
-
         std::vector<VkExtensionProperties> extensions = wrappers::getExtensions(device);
 
-
-        for (auto req_extension : required_extensions)
+        for (auto req : required_ext)
         {
             bool found = false;
+
             for (auto extension : extensions)
             {
-                std::cout << "\t\t" << extension.extensionName << "\n";
-                if (!strcmp(req_extension, extension.extensionName))
+                if (!strcmp(extension.extensionName, req))
                 {
                     found = true;
                     break;
                 }
+                //std::cout << "\t\t" << extension.extensionName << "\n";
             }
 
             if (!found)
-                return false;
+                return false;//throw std::runtime_error("Extension is not supported\n");
         }
+
         return true;
+        
+    }
+
+
+    bool isGPUSuitable(VkPhysicalDevice device, std::vector<const char*> required_ext)
+    {
+        VkPhysicalDeviceFeatures features;
+        VkPhysicalDeviceProperties properties;
+       
+        vkGetPhysicalDeviceProperties(device, &properties);
+        vkGetPhysicalDeviceFeatures(device, &features);
+
+        //ListExtensions(device);
+
+        bool ext_support = checkGPUExtensionsSupport(device, required_ext);
+
+        return properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && features.geometryShader && ext_support;
+
     }
 
     VkPhysicalDevice SelectGPU(VkInstance instance, std::vector<const char*> required_ext)
@@ -344,30 +363,17 @@ namespace gpu
                 break;
             }
         }
-            
+        if (device == VK_NULL_HANDLE)
+            throw std::runtime_error("No GPU was selected\n");
+
         return device;
         
     }
 
-    void doGPUOperation(VkInstance instance, void (*func)(VkPhysicalDevice device) = NULL)
-    {
-        
-        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
-
-        if (func)
-        {
-            for (auto gpu : gpus)
-            {
-                func(gpu);
-            }
-        }
-        
-            
-    }
 }
 namespace queuefamilies
 {
-    std::vector<VkQueueFamilyProperties> getQueueProperties(VkPhysicalDevice device)
+    std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice device)
     {
         std::vector<VkQueueFamilyProperties> Properties = utils::getData(device, vkGetPhysicalDeviceQueueFamilyProperties);
         return Properties;
@@ -379,6 +385,7 @@ class Extensions
 public:
 
     std::vector<const char*> requiredExtensions = { VK_EXT_DEBUG_UTILS_EXTENSION_NAME };
+    std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
     Extensions() {};
     ~Extensions() {};
@@ -440,68 +447,25 @@ public:
 class VulkanProgram
 {
 public:
-
-    VkInstance instance;
     Extensions Ext;
     ValidationLayers valLay;
 
+    VkInstance instance;
+    VkDevice device;
+    VkSurfaceKHR surface;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+    VkQueue presentationQueue = VK_NULL_HANDLE, graphicsQueue = VK_NULL_HANDLE;
 
     void run()
     {
 
-        //initWindow();
+        initWindow();
         initVulkan();
         setupDebugMessenger();
 
-        //gpu::doGPUOperation(instance, gpu::ListExtensions);
-
-        std::vector<VkPhysicalDevice> gpus = wrappers::getGPUS(instance);
-
-
-        // TEST ZONE
-        //std::vector<VkPhysicalDevice> gpus = utils::getGPUS(instance);
-        /* VULKAN_KEY_START */
-        VkDeviceQueueCreateInfo queue_info = {};
-
-
-
-        std::vector<VkQueueFamilyProperties> Qprop = queuefamilies::getQueueProperties(physicalDevice);
-        
-        bool found = false;
-        for (unsigned int i = 0; i < Qprop.size(); i++) {
-            if (Qprop[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                queue_info.queueFamilyIndex = i;
-                found = true;
-                break;
-            }
-        }
-
-        float queue_priorities[1] = { 0.0 };
-        queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_info.pNext = NULL;
-        queue_info.queueCount = 1;
-        queue_info.pQueuePriorities = queue_priorities;
-
-        VkDeviceCreateInfo device_info = {};
-        device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        device_info.pNext = NULL;
-        device_info.queueCreateInfoCount = 1;
-        device_info.pQueueCreateInfos = &queue_info;
-        device_info.enabledExtensionCount = 0;
-        device_info.ppEnabledExtensionNames = NULL;
-        device_info.enabledLayerCount = 0;
-        device_info.ppEnabledLayerNames = NULL;
-        device_info.pEnabledFeatures = NULL;
-
-        VkDevice device;
-        if (vkCreateDevice(gpus[0], &device_info, NULL, &device) != VK_SUCCESS)
-            throw std::runtime_error("Could't create device!");
-
-        vkDestroyDevice(device, NULL);
-        /* VULKAN_KEY_END */
-
+        Loop();
         std::cout << "Sup\n";
-
         ClearUp();
     }
 
@@ -559,8 +523,6 @@ public:
     }
 #pragma endregion
 
-
-
 private:
     GLFWwindow* window;
     void initWindow()
@@ -575,13 +537,93 @@ private:
 
 #pragma region initVulkan
 
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-
     void initVulkan()
     {
         std::cout << "Initializing the engine...\n";
         genInstance();
-        physicalDevice = gpu::SelectGPU(instance, Ext.requiredExtensions);
+        genSurface();
+        genDevice();
+    }
+
+    void genSurface() {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create window surface!");
+        }
+    }
+
+    struct QueueFamilyIndices
+    {
+        uint32_t graphics = -1, presentation = -1;
+        bool isComplete()
+        {
+            return (graphics != -1) && (presentation != -1);
+        }
+    };
+
+    void genDevice()
+    {
+        physicalDevice = gpu::SelectGPU(instance, Ext.deviceExtensions);
+
+
+        std::vector<VkQueueFamilyProperties> Qprop = queuefamilies::getQueueFamilyProperties(physicalDevice);
+
+        QueueFamilyIndices fam;
+
+        bool found = false;
+        for (unsigned int i = 0; i < Qprop.size(); i++) {
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+            std::bitset<8> flags(Qprop[i].queueFlags);
+            std::cout << flags << "\n";
+
+            if (presentSupport)
+            {
+                fam.presentation = i;
+            }
+
+
+            if (Qprop[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {  // flags specified as bits
+                //queue_info.queueFamilyIndex 
+                fam.graphics = i;
+                found = true;
+                break;
+            }
+        }
+
+        if (!fam.isComplete())
+            throw std::runtime_error("No QueueFamily was selected\n");
+
+        std::set<uint32_t> uniqueQueueFamilies = { fam.presentation, fam.graphics };
+
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
+        float queue_priority = 1.0f;
+        for (auto qFamily : uniqueQueueFamilies)
+        {
+            VkDeviceQueueCreateInfo queue_info = {};
+            queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_info.pNext = NULL;
+            queue_info.queueCount = 1;
+            queue_info.pQueuePriorities = &queue_priority;
+            queueCreateInfos.push_back(queue_info);
+        }
+
+        VkDeviceCreateInfo device_info = {};
+        device_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        device_info.pNext = NULL;
+        device_info.queueCreateInfoCount = (uint32_t)(queueCreateInfos.size());
+        device_info.pQueueCreateInfos = queueCreateInfos.data();
+        device_info.enabledExtensionCount = (uint32_t)Ext.deviceExtensions.size();
+        device_info.ppEnabledExtensionNames = Ext.deviceExtensions.data();
+        device_info.enabledLayerCount = (uint32_t)valLay.requiredValidationLayers.size();
+        device_info.ppEnabledLayerNames = valLay.requiredValidationLayers.data();
+        device_info.pEnabledFeatures = NULL;
+
+        if (vkCreateDevice(physicalDevice, &device_info, NULL, &device) != VK_SUCCESS)
+            throw std::runtime_error("Could't create logical device!");
+
+        vkGetDeviceQueue(device, fam.graphics, NULL, &graphicsQueue);
+        vkGetDeviceQueue(device, fam.presentation, NULL, &presentationQueue);
     }
 
     void genInstance()
@@ -633,22 +675,24 @@ private:
     }
 #pragma endregion 
 
-
     void Loop()
     {
 
     }
-
     void ClearUp()
     {
         if (enableValidationLayers) {
             DestroyDebugUtilsMessengerEXT(instance, debugMessenger, NULL);
         }
 
-        vkDestroyInstance(instance, NULL);
+        vkDestroyDevice(device, NULL);
+
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        
+        vkDestroyInstance(instance, nullptr);
+
         std::cout << "Cleaning done";
     }
-
 };
 
 

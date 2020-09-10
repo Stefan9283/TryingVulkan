@@ -11,8 +11,8 @@ TODO:
 - ~~layer validation fixing~~
 - ~~create a GPU rating function~~
 - ~~select physical device~~
-- pick a queue family
-- create logical device
+- ~~pick a queue family~~
+- ~~create logical device~~
 - create swapchain
 - create imageviews 
 - start working on the graphics pipeline implementation...
