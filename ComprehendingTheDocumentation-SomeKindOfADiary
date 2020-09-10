@@ -8,5 +8,14 @@ Every Vulkan process needs:
 - imageviews (viewport related?)
 
 For degugging purposes validation layers can be used.
-Their behaviour can be  changed using the Vulkan Configurator that
+Their behaviour can be changed using the Vulkan Configurator that
 comes with the LunarG Vulkan SDK.
+
+Every physical device has a couple of queues of different types. They can be checked using VkQueueFlagBits flags.
+Multiple queues form a queue family which needs to be passed when creating an interface/logical device for the GPUs.
+
+Pulling arrays of structs using the Vulkan functions seems to follow a pattern of getting the count (uint32_t passed
+by reference to function) and then calling them again with an array or vector of said size. For the particular reason
+I've written a bunch of templates which can be found in the "utils" namespace and are used in "wrappers".
+
+There are 2 types of extensions I've stumbbled upon: physical device and instance extensions. 
