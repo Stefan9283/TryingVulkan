@@ -13,7 +13,7 @@ TODO:
 - ~~select physical device~~
 - ~~pick a queue family~~
 - ~~create logical device~~
-- create swapchain
+- ~~create swapchain~~
 - create imageviews 
 - start working on the graphics pipeline implementation...
 
