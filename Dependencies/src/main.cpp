@@ -13,11 +13,14 @@
 #include <set>
 #include <string>
 
+
+#include <array>
 #include <bitset>
 
+#include "glm.hpp"
 // to be used for shader compilation at runtime
-#include "glslang/SPIRV/GlslangToSpv.h"
-#include "glslang/Public/ShaderLang.h"
+//#include "glslang/SPIRV/GlslangToSpv.h"
+//#include "glslang/Public/ShaderLang.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -260,8 +263,8 @@ namespace wrappers
         std::vector<VkLayerProperties> layers = utils::getData(vkEnumerateInstanceLayerProperties);
         return layers;
     }
-    
-    
+
+
 
     namespace swapchain
     {
@@ -288,7 +291,7 @@ namespace wrappers
             return images;
         }
 
-    
+
     }
     namespace queuefamilies
     {
@@ -440,7 +443,7 @@ namespace wrappers
     }
 
 
-    
+
 }
 
 class Extensions
@@ -473,7 +476,6 @@ public:
     ~ValidationLayers() {};
 
     const std::vector<const char*> requiredValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-
     bool checkSupport()
     {
         std::vector<VkLayerProperties> layers = wrappers::getLayers();
@@ -484,6 +486,7 @@ public:
             //std::cout << required << "\n";
             for (auto layer : layers)
             {
+                std::cout << "\t" << layer.layerName << "\n";
                 //std::cout << "\t" << layer.layerName << "\n";
                 if (!strcmp(layer.layerName, required))
                 {
@@ -495,6 +498,7 @@ public:
 
             if (!found)
             {
+                std::cout << required << "\n";
                 throw std::runtime_error("Could't find required extension");
                 return false;
 
@@ -524,6 +528,36 @@ static std::vector<char> readFile(const std::string& filename) {
 
     return buffer;
 }
+
+struct Vertex {
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        return attributeDescriptions;
+    }
+};
 
 
 class VulkanProgram
@@ -559,6 +593,11 @@ public:
 
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
+    const std::vector<Vertex> vertices = {
+    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+    };
 
     void run()
     {
@@ -597,17 +636,17 @@ public:
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
                                      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                                      VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | 
-                                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                                  VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
         createInfo.pUserData = NULL;
         createInfo.flags = 0;
 
-        
+
         checkcall(CreateDebugUtilsMessengerEXT(instance, &createInfo, NULL, &debugMessenger));
 
     }
@@ -681,9 +720,6 @@ private:
             }
         }
     }
-
-
-
     void createCommandBuffers() {
         commandBuffers.resize(swapChainFramebuffers.size());
         VkCommandBufferAllocateInfo allocInfo{};
@@ -730,8 +766,6 @@ private:
         }
 
     }
-
-
     void createCommandPool() {
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -742,7 +776,6 @@ private:
             throw std::runtime_error("failed to create command pool!");
         }
     }
-
     void createFramebuffers() {
         swapChainFramebuffers.resize(swapChainImageViews.size());
 
@@ -777,7 +810,7 @@ private:
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        
+
         VkAttachmentReference colorAttachmentRef{};
         colorAttachmentRef.attachment = 0;
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -808,7 +841,6 @@ private:
             throw std::runtime_error("failed to create render pass!");
         }
     }
-
     VkShaderModule createShaderModule(const std::vector<char>& code)
     {
         VkShaderModuleCreateInfo create_info{};
@@ -823,12 +855,11 @@ private:
         return shaderModule;
 
     }
-
     void createGraphicsPipelineLayout()
     {
         auto vertShaderCode = readFile("Dependencies/shaders/vert.spv");
         auto fragShaderCode = readFile("Dependencies/shaders/frag.spv");
-   
+
         VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
@@ -849,12 +880,15 @@ private:
 
         /// /////////////////////////////
 
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -883,7 +917,7 @@ private:
         VkPipelineRasterizationStateCreateInfo rasterizer{};
         rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizer.depthClampEnable = VK_FALSE;
-        
+
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
 
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
@@ -909,7 +943,7 @@ private:
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment{};
         colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        
+
         /*
         colorBlendAttachment.blendEnable = VK_FALSE;
         colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
@@ -966,7 +1000,7 @@ private:
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
         pipelineInfo.pStages = shaderStages;
-       
+
         pipelineInfo.pVertexInputState = &vertexInputInfo;
         pipelineInfo.pInputAssemblyState = &inputAssembly;
         pipelineInfo.pViewportState = &viewportState;
@@ -993,7 +1027,6 @@ private:
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
 
     }
-
     void genImageViews()
     {
         swapChainImageViews.resize(swapChainImages.size());
@@ -1018,7 +1051,7 @@ private:
                 throw std::runtime_error("failed to create image views!");
             }
         }
-        
+
 
     }
     struct QueueFamilyIndices
@@ -1153,7 +1186,7 @@ private:
 
 
             if (Qprop[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {  // flags specified as bits
-                //queue_info.queueFamilyIndex 
+                //queue_info.queueFamilyIndex
                 fam.graphics = i;
                 found = true;
                 break;
@@ -1236,7 +1269,7 @@ private:
             else throw std::runtime_error("Validation Layers are not supported\n");
         }
 
-        if (vkCreateInstance(&inst_info, NULL, &instance) == VK_ERROR_INCOMPATIBLE_DRIVER) 
+        if (vkCreateInstance(&inst_info, NULL, &instance) == VK_ERROR_INCOMPATIBLE_DRIVER)
         {
             std::cout << "cannot find a compatible Vulkan ICD\n";
             exit(-1);
@@ -1244,7 +1277,7 @@ private:
         else std::cout << "Instance was created successfully\n";
 
     }
-#pragma endregion 
+#pragma endregion
 
     void Loop()
     {
@@ -1338,7 +1371,7 @@ private:
         vkDestroyDevice(device, NULL);
 
         vkDestroySurfaceKHR(instance, surface, nullptr);
-        
+
         vkDestroyInstance(instance, nullptr);
 
         std::cout << "Cleaning done";

@@ -14,7 +14,7 @@ TODO:
 - ~~pick a queue family~~
 - ~~create logical device~~
 - ~~create swapchain~~
-- create imageviews 
+- create imageviews
 - start working on the graphics pipeline implementation...
 
 Dependencies:
